@@ -82,13 +82,13 @@ function combineURLs(baseURL, relativeURL) {
         : baseURL;
 }
 
-function extractFavicons(query, baseUrl) {
+function processIcons(query, pattern, baseUrl) {
     const urls = [];
-    const favicon = query("link[rel='icon' i], link[rel='shortcut icon' i], link[rel='alternate icon' i]");
-    favicon.each((index, $el) => {
+    const icons = query(pattern);
+    icons.each((index, $el) => {
         let url = query($el).attr('href');
         if (url.slice(0, 2) == '//') {
-            url = `${baseUrl.match(/(https?)/)[0]}:${url}`
+            url = `${baseUrl.match(/(https?)/)[0]}:${url}`;
         }
         const validity = isValidURL(url);
         if (validity.isValid) {
@@ -99,27 +99,17 @@ function extractFavicons(query, baseUrl) {
         }
     });
     return urls;
+}
+
+function extractFavicons(query, baseUrl) {
+    const pattern = "link[rel='icon' i], link[rel='shortcut icon' i], link[rel='alternate icon' i]";
+    return processIcons(query, pattern, baseUrl);
 }
 
 function extractAppleIcons(query, baseUrl) {
-    const urls = [];
-    const favicon = query("link[rel='apple-touch-icon']");
-    favicon.each((index, $el) => {
-        let url = query($el).attr('href');
-        if (url.slice(0, 2) == '//') {
-            url = `${baseUrl.match(/(https?)/)[0]}:${url}`
-        }
-        const validity = isValidURL(url);
-        if (validity.isValid) {
-            if (!validity.isAbsolute) {
-                url = combineURLs(baseUrl, url)
-            }
-            urls.push({url, scrapped: true});
-        }
-    });
-    return urls;
+    const pattern = "link[rel='apple-touch-icon']";
+    return processIcons(query, pattern, baseUrl);
 }
-
 
 function extractIcons(query, baseUrl, config) {
     const defaultFavicons = getDefaultFaviconUrls(baseUrl);
