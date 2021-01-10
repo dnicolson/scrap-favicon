@@ -87,6 +87,9 @@ function extractFavicons(query, baseUrl) {
     const favicon = query("link[rel='icon' i], link[rel='shortcut icon' i], link[rel='alternate icon' i]");
     favicon.each((index, $el) => {
         let url = query($el).attr('href');
+        if (url.slice(0, 2) == '//') {
+            url = `${baseUrl.match(/(https?)/)[0]}:${url}`
+        }
         const validity = isValidURL(url);
         if (validity.isValid) {
             if (!validity.isAbsolute) {
@@ -103,6 +106,9 @@ function extractAppleIcons(query, baseUrl) {
     const favicon = query("link[rel='apple-touch-icon']");
     favicon.each((index, $el) => {
         let url = query($el).attr('href');
+        if (url.slice(0, 2) == '//') {
+            url = `${baseUrl.match(/(https?)/)[0]}:${url}`
+        }
         const validity = isValidURL(url);
         if (validity.isValid) {
             if (!validity.isAbsolute) {
