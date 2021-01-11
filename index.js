@@ -4,6 +4,7 @@ const {performance} = require('perf_hooks');
 const Url = require('url');
 const followRedirects = require('follow-redirects');
 const { http, https } = require('follow-redirects');
+const zlib = require('zlib');
 
 const ERROR_ENUM = {
     UNKNOWN: 'unknown',
@@ -38,13 +39,23 @@ function scrapWebsite(url, config) {
 
         const req = Client.get(parsedUrl, resp => {
             let responseData = '';
+
+            let output;
+            if (resp.headers['content-encoding'] === 'gzip') {
+                const gzip = zlib.createGunzip();
+                resp.pipe(gzip);
+                output = gzip;
+            } else {
+                output = resp;
+            }
+
             // A chunk of data has been received.
-            resp.on('data', (chunk) => {
+            output.on('data', (chunk) => {
                 responseData += chunk;
             });
 
             // The whole response has been received. Print out the result.
-            resp.on('end', () => {
+            output.on('end', () => {
                 resolve({
                     html: responseData,
                     url: url
