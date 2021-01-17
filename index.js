@@ -114,16 +114,17 @@ function processIcons(query, pattern, baseUrl) {
 
 function extractFavicons(query, baseUrl) {
     const pattern = "link[rel='icon' i], link[rel='shortcut icon' i], link[rel='alternate icon' i]";
-    return processIcons(query, pattern, baseUrl);
+    return processIcons(query, pattern, baseUrl).map(icon => ({...icon, origin: 'browser'}))
 }
 
 function extractAppleIcons(query, baseUrl) {
     const pattern = "link[rel='apple-touch-icon']";
-    return processIcons(query, pattern, baseUrl);
+    return processIcons(query, pattern, baseUrl).map(icon => ({...icon, origin: 'mobile'}))
 }
 
 function extractIcons(query, baseUrl, config) {
-    const defaultFavicons = getDefaultFaviconUrls(baseUrl);
+    const defaultFavicons = getDefaultFaviconUrls(baseUrl)
+    //TODO: add `origin` to default lookups
     const urlsInfo = [...extractAppleIcons(query, baseUrl), ...extractFavicons(query, baseUrl), ...defaultFavicons];
     const filteredUrlInfo = urlsInfo.filter((info, index) => urlsInfo.findIndex(_info => _info.url === info.url) === index);
 
